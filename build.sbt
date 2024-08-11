@@ -103,7 +103,9 @@ lazy val server = (project in file("server"))
       // Fix for: method derived is declared as `inline`, but was not inlined
       // which happens at circe automatic derivation for response.as[AsteroidDetail]
       // where AsteroidDetail is a case class containing case class, containing cas class, etc
-      "-Xmax-inlines", "70"
+      "-Xmax-inlines", "70",
+
+      "-Wnonunit-statement"
     )
   )
   .dependsOn(core.jvm)

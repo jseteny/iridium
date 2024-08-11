@@ -9,8 +9,8 @@ class LogicTest extends AnyFlatSpec {
     val endDate = java.time.LocalDate.of(2021, 1, 10)
     val result = makeMax7DaysRanges(startDate, endDate)
     assert(result == List(
-      (java.time.LocalDate.of(2021, 1, 1), java.time.LocalDate.of(2021, 1, 7)),
-      (java.time.LocalDate.of(2021, 1, 8), java.time.LocalDate.of(2021, 1, 10))
+      (java.time.LocalDate.of(2021, 1, 1), java.time.LocalDate.of(2021, 1, 8)),
+      (java.time.LocalDate.of(2021, 1, 9), java.time.LocalDate.of(2021, 1, 10))
     ))
   }
 

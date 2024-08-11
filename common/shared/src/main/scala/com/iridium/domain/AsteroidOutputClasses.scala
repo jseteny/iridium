@@ -1,6 +1,6 @@
 package com.iridium.domain
 
-case class AsteroidOutputList(
+case class AsteroidOutput(
     name: String,
     id: Int
 )
