@@ -56,7 +56,7 @@ lazy val doobieVersion              = "1.0.0-RC1"
 lazy val pureConfigVersion          = "0.17.1"
 lazy val log4catsVersion            = "2.4.0"
 lazy val tsecVersion                = "0.4.0"
-lazy val scalaTestVersion           = "3.2.12 -r"
+lazy val scalaTestVersion           = "3.2.12"
 lazy val scalaTestCatsEffectVersion = "1.4.0"
 lazy val testContainerVersion       = "1.17.3"
 lazy val logbackVersion             = "1.4.0"
@@ -101,9 +101,9 @@ lazy val server = (project in file("server"))
     Compile / mainClass := Some("com.iridium.Application"),
     scalacOptions ++= Seq(
       // Fix for: method derived is declared as `inline`, but was not inlined
-      // which happens at circe automatic derivation for response.as[RootInterface]
-      // where RootInterface is a case class containing case class, etc
-      "-Xmax-inlines", "50"
+      // which happens at circe automatic derivation for response.as[AsteroidDetail]
+      // where AsteroidDetail is a case class containing case class, containing cas class, etc
+      "-Xmax-inlines", "70"
     )
   )
   .dependsOn(core.jvm)

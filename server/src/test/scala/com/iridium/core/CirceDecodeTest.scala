@@ -151,9 +151,17 @@ class CirceDecodeTest extends AnyFlatSpec with Matchers with CirceInstances {
       case Right(_)    =>
   }
 
-  it should "decode a JSON coming from http://api.nasa.gov/neo/rest/v1" in {
-    io.circe.parser.decode[domain.RootInterface](
+  it should "decode an Asteroid List coming from http://api.nasa.gov/neo/rest/v1" in {
+    io.circe.parser.decode[domain.AsteroidList](
       scala.io.Source.fromResource("asteroids 1-3.json").mkString
+    ) match
+      case l @ Left(_) => fail(l.toString)
+      case Right(_)    =>
+  }
+
+  it should "decode Asteroid Details coming from http://api.nasa.gov/neo/rest/v1" in {
+    io.circe.parser.decode[domain.AsteroidDetails](
+      scala.io.Source.fromResource("2007822.json").mkString
     ) match
       case l @ Left(_) => fail(l.toString)
       case Right(_)    =>
