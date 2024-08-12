@@ -1,0 +1,4 @@
+db-database-jdbc-uri="jdbc:postgresql://localhost:5444/iridium"
+db-user=iridium
+db-password=iridium
+client-config.api-key=DEMO_KEY

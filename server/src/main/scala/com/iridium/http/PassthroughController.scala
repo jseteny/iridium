@@ -5,7 +5,7 @@ import cats.*
 import cats.effect.*
 import cats.syntax.all.*
 import com.iridium.client.AsteroidClient
-import com.iridium.core.Favourites
+import com.iridium.database.Favourites
 import com.iridium.domain.*
 import io.circe.generic.auto.*
 import org.http4s.*

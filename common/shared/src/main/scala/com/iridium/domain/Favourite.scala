@@ -1,6 +1,6 @@
 package com.iridium.domain
 
-case class Favourite(
+final case class Favourite(
     id: Int,
     name: String
 )

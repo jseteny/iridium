@@ -1,9 +1,9 @@
+CREATE DATABASE iridium;
+CREATE USER iridium WITH PASSWORD 'iridium';
+GRANT ALL PRIVILEGES ON DATABASE iridium TO iridium;
 
-drop table if exists favourites;
-
-CREATE TABLE favourites (
-	id INT PRIMARY KEY,
-	name VARCHAR(255) UNIQUE NOT NULL
+CREATE TABLE iridium.favourites
+(
+    id   INT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL
 );
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON favourites TO iridium;

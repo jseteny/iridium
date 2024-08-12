@@ -1,11 +1,11 @@
 package com.iridium.domain
 
-case class AsteroidOutput(
+final case class AsteroidOutput(
     name: String,
     id: Int
 )
 
-case class ErrorOutput(
+final case class ErrorOutput(
     code: Int,
     http_error: String,
     message: String,

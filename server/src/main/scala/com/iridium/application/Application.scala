@@ -4,7 +4,7 @@ package application
 import cats.effect.*
 import com.comcast.ip4s.*
 import com.iridium.client.*
-import com.iridium.core.*
+import com.iridium.database.*
 import com.iridium.http.*
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
@@ -17,7 +17,7 @@ import pureconfig.generic.derivation.default.*
 
 object Application extends IOApp.Simple {
 
-  case class Config(dbDatabaseJdbcUri: String, dbUser: String, dbPassword: String, clientConfig: AsteroidClient.Config)
+  final case class Config(dbDatabaseJdbcUri: String, dbUser: String, dbPassword: String, clientConfig: AsteroidClient.Config)
     derives ConfigReader
 
   // noinspection ScalaDeprecation
@@ -47,12 +47,19 @@ object Application extends IOApp.Simple {
     )
   } yield transactor
 
+  def assembleApp: Resource[IO, (PassthroughController[IO], Favourites[IO])] = {
+    for {
+      config                <- loadConfig("config.txt")
+      postgres              <- makePostgres(config)
+      client                <- AsteroidClient.resource[IO](config.clientConfig)
+      favourites            <- FavouritesLive.resource[IO](postgres)
+      passthroughController <- PassthroughController.resource[IO](client, favourites)
+    } yield (passthroughController, favourites)
+  }
+
   def makeServer: Resource[IO, Server] = for {
-    config                <- loadConfig("config.txt")
-    postgres              <- makePostgres(config)
-    client                <- AsteroidClient.resource[IO](config.clientConfig)
-    favourites            <- FavouritesLive.resource[IO](postgres)
-    passthroughController <- PassthroughController.resource[IO](client, favourites)
+    tuple <- assembleApp
+    (passthroughController, _) = tuple
     server <- EmberServerBuilder
       .default[IO]
       .withHost(host"0.0.0.0")

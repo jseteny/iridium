@@ -1,28 +1,34 @@
  ## How to run the project
 
-You need a _config.txt_ file in the root of the project with the following content:
+If you want to use your own api-key you got from NASA you need to modify the _config.txt_ file in the root of the project which has the following content:
 
-        db-database-jdbc-uri="jdbc:postgresql://localhost:5432/iridium"
+        db-database-jdbc-uri="jdbc:postgresql://localhost:5444/iridium"
         db-user=iridium
         db-password=iridium
         client-config.api-key=DEMO_KEY
 
 You need a PostgreSQL database where you execute the following SQL script:
 
-    CREATE DATABASE iridium;
-    CREATE USER iridium WITH PASSWORD 'iridium';
-    GRANT ALL PRIVILEGES ON DATABASE iridium TO iridium;
-
     CREATE TABLE favourites (
         id INT PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL
     );
+
+Please run db/docker-compose.yml to start the database.
 
 Then you can run the project with the following command:
 
     sbt server/run
     
 Please see _test.http_ file for the API documentation.
+
+_ApplicationTest.scala_ contains the integration tests.
+
+_LogicTest.scala_ contains the business logic tests about ranges having more than 7 days.
+
+_CirceTest.scala_ contains the JSON parsing tests.
+
+Although the project template I use is a full-stack application, I have only implemented the backend side. The frontend side is not implemented.
 
 
 ## Tech challenge 1

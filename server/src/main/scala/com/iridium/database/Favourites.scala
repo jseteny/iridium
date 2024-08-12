@@ -1,4 +1,4 @@
-package com.iridium.core
+package com.iridium.database
 
 import cats.effect.*
 import cats.syntax.all.*
@@ -12,6 +12,7 @@ trait Favourites[F[_]] { // "algebra"
   def create(favourite: Favourite): F[Int]
   def all: F[List[Favourite]]
   def exists(id: Int): F[Boolean]
+  def deleteAll: F[Unit]
 }
 
 class FavouritesLive[F[_]: Concurrent] private (transactor: Transactor[F]) extends Favourites[F] {
@@ -41,7 +42,7 @@ class FavouritesLive[F[_]: Concurrent] private (transactor: Transactor[F]) exten
       .transact(transactor)
       .compile
       .count
-      .map(_>0)
+      .map(_ > 0)
 
   override def create(favourite: Favourite): F[Int] = {
     val insertedFavourite =
@@ -55,6 +56,12 @@ class FavouritesLive[F[_]: Concurrent] private (transactor: Transactor[F]) exten
 
     insertedFavourite.transact(transactor)
   }
+
+  override def deleteAll: F[Unit] = {
+    sql"""
+      DELETE FROM favourites
+      """.update.run.transact(transactor).void
+  }
 }
 
 object FavouritesLive {
@@ -67,7 +74,7 @@ object FavouritesLive {
 
 object FavouritesPlayground extends IOApp.Simple {
 
-  def makePostgres = for {
+  private def makePostgres = for {
     config <- com.iridium.application.Application.loadConfig("config.txt")
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
     transactor <- HikariTransactor.newHikariTransactor[IO](
@@ -79,7 +86,7 @@ object FavouritesPlayground extends IOApp.Simple {
     )
   } yield transactor
 
-  def program(postgres: Transactor[IO]) =
+  private def program(postgres: Transactor[IO]) =
     for {
       favourites <- FavouritesLive.make[IO](postgres)
       favouriteList <- favourites.all

@@ -3,6 +3,7 @@ package com.iridium.client
 import com.iridium.domain.*
 import cats.*
 import cats.effect.*
+import cats.implicits.{toFlatMapOps, toFunctorOps}
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
@@ -21,7 +22,7 @@ class AsteroidClient[F[_]: Async] private (config: AsteroidClient.Config) {
   private val threadPoolOf32 = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(32))
   private val logger         = Slf4jLogger.getLogger[F]
 
-  implicit val localDateQueryParamEncoder: QueryParamEncoder[LocalDate] =
+  private implicit val localDateQueryParamEncoder: QueryParamEncoder[LocalDate] =
     QueryParamEncoder[String].contramap(DateTimeFormatter.ISO_LOCAL_DATE.format)
 
   def searchByRange(from: LocalDate, to: LocalDate): F[AsteroidList] =
@@ -36,9 +37,7 @@ class AsteroidClient[F[_]: Async] private (config: AsteroidClient.Config) {
         case r                           => r.as[AsteroidList]
       }
     }
-
-  import cats.implicits.{toFlatMapOps, toFunctorOps}
-
+  
   def detailsOf(asteroidId: Int): F[AsteroidDetails] =
     EmberClientBuilder.default[F].build.use { client =>
       val uri = uri"https://api.nasa.gov/neo/rest/v1/neo"
@@ -57,7 +56,7 @@ class AsteroidClient[F[_]: Async] private (config: AsteroidClient.Config) {
 }
 
 object AsteroidClient {
-  case class Config(apiKey: String)
+  final case class Config(apiKey: String)
 
   def resource[F[_]: Async](config: Config): Resource[F, AsteroidClient[F]] =
     Resource.pure(new AsteroidClient[F](config))
