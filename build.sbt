@@ -104,7 +104,7 @@ lazy val server = (project in file("server"))
         "ch.qos.logback"     % "logback-classic"               % logbackVersion
     ).map(_ % Test),
 
-    Compile / mainClass := Some("com.iridium.Application"),
+    Compile / mainClass := Some("com.iridium.application.Application"),
     scalacOptions ++= Seq(
       // Fix for: method derived is declared as `inline`, but was not inlined
       // which happens at circe automatic derivation for response.as[AsteroidDetail]

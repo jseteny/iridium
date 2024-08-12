@@ -1,10 +1,37 @@
-## The tech challenge 1
+ ## How to run the project
+
+You need a _config.txt_ file in the root of the project with the following content:
+
+        db-database-jdbc-uri="jdbc:postgresql://localhost:5432/iridium"
+        db-user=iridium
+        db-password=iridium
+        client-config.api-key=DEMO_KEY
+
+You need a PostgreSQL database where you execute the following SQL script:
+
+    CREATE DATABASE iridium;
+    CREATE USER iridium WITH PASSWORD 'iridium';
+    GRANT ALL PRIVILEGES ON DATABASE iridium TO iridium;
+
+    CREATE TABLE favourites (
+        id INT PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL
+    );
+
+Then you can run the project with the following command:
+
+    sbt server/run
+    
+Please see _test.http_ file for the API documentation.
+
+
+## Tech challenge 1
 
 Suppose you have a database with three tables: "users", "orders", and "products". The "users" table contains columns id, name, and email. The "orders" table contains columns id, user_id, product_id, quantity, and created_at. The "products" table contains columns id, name, price, and category.
 
 Write a single SQL query that returns a list of all users who have made at least 3 orders in the "Electronics" category and have spent more than $1000 on those orders, sorted by the total amount they have spent in descending order. The output should include the user's name, email, and the total amount they have spent on "Electronics" orders.
 
-## The tech challenge 2
+## Tech challenge 2
 
 _You'll be asked of developing a small full-stack application (with both backend and frontend) using the best of your knowledges, taking into account best practices and code reusability.
 We also want you to have fun with this!_

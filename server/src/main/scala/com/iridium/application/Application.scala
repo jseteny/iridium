@@ -15,20 +15,20 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import pureconfig.*
 import pureconfig.generic.derivation.default.*
 
-case class MyConfig(dbDatabase: String, dbUser: String, dbPassword: String, clientConfig: AsteroidClient.Config)
-    derives ConfigReader
-
 object Application extends IOApp.Simple {
+
+  case class Config(dbDatabaseJdbcUri: String, dbUser: String, dbPassword: String, clientConfig: AsteroidClient.Config)
+    derives ConfigReader
 
   // noinspection ScalaDeprecation
   private val corsConfig = CORSConfig.default.withAllowCredentials(false)
   private val logger     = Slf4jLogger.getLogger[IO]
 
-  def loadConfig(fileName: String): Resource[IO, MyConfig] = {
+  def loadConfig(fileName: String): Resource[IO, Config] = {
     Resource.pure(
       ConfigSource
         .file(fileName)
-        .load[MyConfig]
+        .load[Config]
         .fold(
           e => throw new RuntimeException(e.toString),
           identity
@@ -36,11 +36,11 @@ object Application extends IOApp.Simple {
     )
   }
 
-  private def makePostgres(config: MyConfig) = for {
+  private def makePostgres(config: Config) = for {
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
     transactor <- HikariTransactor.newHikariTransactor[IO](
       "org.postgresql.Driver",
-      s"jdbc:postgresql://localhost:5432/${config.dbDatabase}",
+      config.dbDatabaseJdbcUri,
       config.dbUser,
       config.dbPassword,
       ec

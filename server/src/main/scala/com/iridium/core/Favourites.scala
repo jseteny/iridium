@@ -72,7 +72,7 @@ object FavouritesPlayground extends IOApp.Simple {
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
     transactor <- HikariTransactor.newHikariTransactor[IO](
       "org.postgresql.Driver",
-      s"jdbc:postgresql://localhost:5432/${config.dbDatabase}",
+      config.dbDatabaseJdbcUri,
       config.dbUser,
       config.dbPassword,
       ec
