@@ -1,15 +1,16 @@
 package com.iridium.core
 
 import com.iridium.domain.job.*
-import java.util.UUID
 
+import java.util.UUID
 import cats.effect.*
 import cats.syntax.all.*
 import doobie.implicits.*
 import doobie.free.connection.ConnectionIO
 import doobie.postgres.implicits.*
 import doobie.util.transactor.Transactor
-import java.{util => ju}
+
+import java.util as ju
 import doobie.util.ExecutionContexts
 import doobie.hikari.HikariTransactor
 import com.iridium.domain.company
@@ -74,12 +75,13 @@ object JobsLive {
 object JobsPlayground extends IOApp.Simple {
 
   def makePostgres = for {
+    config <- com.iridium.application.Application.loadConfig("config-JobPlayground.txt")
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
     transactor <- HikariTransactor.newHikariTransactor[IO](
       "org.postgresql.Driver",
       "jdbc:postgresql://localhost:5432/full_stack_typelevel_demo",
-      "full_stack_typelevel_demo",
-      "full_stack_typelevel_demo",
+      config.dbUser,
+      config.dbPassword,
       ec
     )
   } yield transactor

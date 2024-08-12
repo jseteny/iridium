@@ -4,36 +4,55 @@ package application
 import cats.effect.*
 import com.comcast.ip4s.*
 import com.iridium.client.*
+import com.iridium.core.*
 import com.iridium.http.*
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
 import org.http4s.server.middleware.{CORS, CORSConfig}
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import pureconfig.*
+import pureconfig.generic.derivation.default.*
+
+case class MyConfig(dbDatabase: String, dbUser: String, dbPassword: String, clientConfig: AsteroidClient.Config)
+    derives ConfigReader
 
 object Application extends IOApp.Simple {
 
-  //noinspection ScalaDeprecation
+  // noinspection ScalaDeprecation
   private val corsConfig = CORSConfig.default.withAllowCredentials(false)
+  private val logger     = Slf4jLogger.getLogger[IO]
 
-  private def makePostgres = for {
+  def loadConfig(fileName: String): Resource[IO, MyConfig] = {
+    Resource.pure(
+      ConfigSource
+        .file(fileName)
+        .load[MyConfig]
+        .fold(
+          e => throw new RuntimeException(e.toString),
+          identity
+        )
+    )
+  }
+
+  private def makePostgres(config: MyConfig) = for {
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
     transactor <- HikariTransactor.newHikariTransactor[IO](
       "org.postgresql.Driver",
-      "jdbc:postgresql://localhost:5432/full_stack_typelevel_demo",
-      "full_stack_typelevel_demo",
-      "full_stack_typelevel_demo",
+      s"jdbc:postgresql://localhost:5432/${config.dbDatabase}",
+      config.dbUser,
+      config.dbPassword,
       ec
     )
   } yield transactor
 
   def makeServer: Resource[IO, Server] = for {
-    postgres <- makePostgres
-    client<- AsteroidClient.resource[IO]
-    passthroughController <- PassthroughController.resource[IO](client)
-    //companies <- CompaniesLive.resource[IO](postgres)
-    //jobs     <- JobsLive.resource[IO](postgres, companies)
-    //jobApi   <- JobRoutes.resource[IO](jobs)
+    config                <- loadConfig("config.txt")
+    postgres              <- makePostgres(config)
+    client                <- AsteroidClient.resource[IO](config.clientConfig)
+    favourites            <- FavouritesLive.resource[IO](postgres)
+    passthroughController <- PassthroughController.resource[IO](client, favourites)
     server <- EmberServerBuilder
       .default[IO]
       .withHost(host"0.0.0.0")
@@ -44,7 +63,7 @@ object Application extends IOApp.Simple {
 
   override def run: IO[Unit] =
     makeServer.use { _ =>
-      IO.println("Iridium! Server ready.") *>
+      logger.info("Iridium Server ready.") *>
         IO.never
     }
 }

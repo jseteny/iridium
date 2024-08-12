@@ -7,6 +7,15 @@ http://localhost:4041/passthrough/search_by_range?start_date=2019-01-01&end_date
 ### details_of
 http://localhost:4041/passthrough/details_of/2007822
 
+### create favourite
+POST http://localhost:4041/passthrough/favourites
+Content-Type: application/json
+
+{ "id": "2007825", "name": "7825 (2002 DB4)" }
+
+### get all favourites
+http://localhost:4041/passthrough/favourites
+
 ### Nasa
 https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-01&end_date=2015-09-08&api_key=DEMO_KEY
 

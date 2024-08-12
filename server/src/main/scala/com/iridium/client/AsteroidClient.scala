@@ -16,10 +16,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 
-class AsteroidClient[F[_] : Async] {
+class AsteroidClient[F[_]: Async] private (config: AsteroidClient.Config) {
 
   private val threadPoolOf32 = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(32))
-  private val logger = Slf4jLogger.getLogger[F]
+  private val logger         = Slf4jLogger.getLogger[F]
 
   implicit val localDateQueryParamEncoder: QueryParamEncoder[LocalDate] =
     QueryParamEncoder[String].contramap(DateTimeFormatter.ISO_LOCAL_DATE.format)
@@ -29,11 +29,11 @@ class AsteroidClient[F[_] : Async] {
       val uri = uri"https://api.nasa.gov/neo/rest/v1/feed"
         .+?("start_date" -> from)
         .+?("end_date" -> to)
-        .+?("api_key" -> "DEMO_KEY")
+        .+?("api_key" -> config.apiKey)
       val request = Request[F](Method.GET, uri)
       client.run(request).evalOn(threadPoolOf32).use {
         case Status.Successful(response) => response.as[AsteroidList]
-        case r => r.as[AsteroidList]
+        case r                           => r.as[AsteroidList]
       }
     }
 
@@ -43,19 +43,22 @@ class AsteroidClient[F[_] : Async] {
     EmberClientBuilder.default[F].build.use { client =>
       val uri = uri"https://api.nasa.gov/neo/rest/v1/neo"
         .addSegment(asteroidId.toString)
-        .+?("api_key" -> "DEMO_KEY")
+        .+?("api_key" -> config.apiKey)
       val request = Request[F](Method.GET, uri)
       client.run(request).evalOn(threadPoolOf32).use {
         case Status.Successful(response) => response.as[AsteroidDetails]
-        case r => for {
-          _<- logger.error(s"Failed to fetch details of asteroid $asteroidId. Response: $r")
-          result <- r.as[AsteroidDetails]
-        } yield result
+        case r =>
+          for {
+            _      <- logger.error(s"Failed to fetch details of asteroid $asteroidId. Response: $r")
+            result <- r.as[AsteroidDetails]
+          } yield result
       }
     }
 }
 
 object AsteroidClient {
-  def resource[F[_]: Async]: Resource[F, AsteroidClient[F]] =
-    Resource.pure(new AsteroidClient[F])
+  case class Config(apiKey: String)
+
+  def resource[F[_]: Async](config: Config): Resource[F, AsteroidClient[F]] =
+    Resource.pure(new AsteroidClient[F](config))
 }

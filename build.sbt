@@ -53,7 +53,7 @@ lazy val app = (project in file("app"))
 lazy val catsEffectVersion          = "3.3.14"
 lazy val http4sVersion              = "0.23.15"
 lazy val doobieVersion              = "1.0.0-RC1"
-lazy val pureConfigVersion          = "0.17.1"
+lazy val pureConfigVersion          = "0.17.7"
 lazy val log4catsVersion            = "2.4.0"
 lazy val tsecVersion                = "0.4.0"
 lazy val scalaTestVersion           = "3.2.12"
@@ -63,6 +63,8 @@ lazy val logbackVersion             = "1.4.0"
 lazy val slf4jVersion               = "2.0.0"
 lazy val javaMailVersion            = "1.6.2"
 lazy val stripeVersion              = "22.12.0"
+lazy val flywayVersion              = "6.3.1"
+lazy val h2Version                  = "1.4.200"
 
 lazy val server = (project in file("server"))
   .settings(
@@ -80,7 +82,11 @@ lazy val server = (project in file("server"))
       "org.tpolecat"          %% "doobie-core"         % doobieVersion,
       "org.tpolecat"          %% "doobie-hikari"       % doobieVersion,
       "org.tpolecat"          %% "doobie-postgres"     % doobieVersion,
+      "org.flywaydb"           % "flyway-core"         % flywayVersion,
+      "org.tpolecat"          %% "doobie-h2"           % doobieVersion,
+      "com.h2database"         % "h2"                  % h2Version,
       "com.github.pureconfig" %% "pureconfig-core"     % pureConfigVersion,
+      "com.github.pureconfig" %% "pureconfig-cats-effect" % pureConfigVersion,
       "org.typelevel"         %% "log4cats-slf4j"      % log4catsVersion,
       "org.slf4j"              % "slf4j-simple"        % slf4jVersion,
       "io.github.jmcardon"    %% "tsec-http4s"         % tsecVersion,
